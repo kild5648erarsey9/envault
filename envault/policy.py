@@ -81,3 +81,25 @@ def check_violations(vault_path: str, env: str) -> list:
                 "reason": f"last rotated {age_days} days ago (max {policy['max_age_days']})",
             })
     return violations
+
+
+def get_days_until_expiry(vault_path: str, env: str, key: str) -> Optional[int]:
+    """Return the number of days until the key's policy expires.
+
+    Returns a negative number if the key is already overdue, None if no policy
+    or rotation record exists for the key.
+    """
+    from envault.rotation import get_rotation_info
+    from datetime import datetime, timezone
+
+    policy = get_policy(vault_path, env, key)
+    if policy is None:
+        return None
+    info = get_rotation_info(vault_path, env, key)
+    if info is None:
+        return None
+    last = datetime.fromisoformat(info["last_rotated"])
+    if last.tzinfo is None:
+        last = last.replace(tzinfo=timezone.utc)
+    age_days = (datetime.now(timezone.utc) - last).days
+    return policy["max_age_days"] - age_days
