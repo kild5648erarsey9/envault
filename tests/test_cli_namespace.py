@@ -52,6 +52,12 @@ def test_remove_namespace(runner, tmp_vault):
     assert "Removed" in result.output
 
 
+def test_remove_nonexistent_key(runner, tmp_vault):
+    """Removing a key that was never assigned should report an error or warning."""
+    result = _invoke(runner, tmp_vault, "remove", "NONEXISTENT")
+    assert result.exit_code != 0 or "Error" in result.output or "not found" in result.output.lower()
+
+
 def test_list_namespaces(runner, tmp_vault):
     _invoke(runner, tmp_vault, "assign", "A", "db")
     _invoke(runner, tmp_vault, "assign", "B", "infra")
