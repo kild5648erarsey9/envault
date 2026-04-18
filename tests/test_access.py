@@ -68,6 +68,13 @@ def test_revoke_access_invalid_mode_raises(tmp_vault):
         revoke_access(tmp_vault, "dev", "staging", ["KEY"], mode="delete")
 
 
+def test_revoke_access_nonexistent_key_is_noop(tmp_vault):
+    """Revoking a key that was never granted should not raise and leave entry intact."""
+    set_access(tmp_vault, "dev", "staging", ["API_KEY"], mode="read")
+    entry = revoke_access(tmp_vault, "dev", "staging", ["DB_URL"], mode="read")
+    assert "API_KEY" in entry["read"]
+
+
 def test_list_roles_empty(tmp_vault):
     assert list_roles(tmp_vault) == []
 
