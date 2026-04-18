@@ -15,6 +15,26 @@ class MissingSecretError(KeyError):
     """Raised when a template references a key that is absent from the vault."""
 
 
+def list_placeholders(template: str) -> list[str]:
+    """Return a deduplicated list of placeholder key names found in *template*.
+
+    The order reflects first appearance in the template.
+
+    Example
+    -------
+    >>> list_placeholders("Hello {{ NAME }}, your token is {{ TOKEN }}")
+    ['NAME', 'TOKEN']
+    """
+    seen: set[str] = set()
+    result: list[str] = []
+    for match in _PATTERN.finditer(template):
+        key = match.group(1)
+        if key not in seen:
+            seen.add(key)
+            result.append(key)
+    return result
+
+
 def render_string(
     template: str,
     vault_path: str,
