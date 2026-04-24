@@ -70,3 +70,13 @@ def test_list_reminders_shows_all(runner, tmp_vault):
     assert result.exit_code == 0
     assert "A" in result.output
     assert "B" in result.output
+
+
+def test_set_reminder_overwrites_existing(runner, tmp_vault):
+    """Setting a reminder on an existing key should replace the previous note."""
+    _invoke(runner, tmp_vault, "set", "prod", "DB_PASS", "Original note")
+    _invoke(runner, tmp_vault, "set", "prod", "DB_PASS", "Updated note")
+    result = _invoke(runner, tmp_vault, "get", "prod", "DB_PASS")
+    assert result.exit_code == 0
+    assert "Updated note" in result.output
+    assert "Original note" not in result.output
