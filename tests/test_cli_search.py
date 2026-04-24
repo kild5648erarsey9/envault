@@ -68,3 +68,13 @@ def test_search_value_restricted_env(runner, tmp_vault):
     assert result.exit_code == 0
     assert "staging" in result.output
     assert "prod" not in result.output
+
+
+def test_search_key_wrong_password(runner, tmp_vault):
+    """Searching with an incorrect password should exit with a non-zero code."""
+    result = runner.invoke(
+        search_cmd,
+        ["--vault", tmp_vault, "--password", "wrongpassword", "key", "DB_*"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code != 0
